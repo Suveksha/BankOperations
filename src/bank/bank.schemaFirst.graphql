@@ -1,0 +1,9 @@
+type Bank{
+    id:ID!
+    name:String!
+    branch:String!
+}
+
+type Query{
+    banks:[Bank]
+}
