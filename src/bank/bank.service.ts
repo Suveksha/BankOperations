@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { BankModel } from './entity/bank.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { BankClass } from './schema/bank.schema';
+import { Model } from 'mongoose';
+import { BankDTO } from './dto/bank.dto';
 
 let banks:BankModel[]=[]
 
@@ -7,41 +11,42 @@ let banks:BankModel[]=[]
 @Injectable()
 export class BankService {
 
-    addBankDetails(bank:BankModel){
-        banks.push(bank)
-        return "Bank details added."
+    constructor(@InjectModel(BankClass.name) private bank:Model<BankClass>){}
+
+    async addBankDetails(bank:BankModel) : Promise<String>{
+        const newBankDetails=new this.bank(bank)
+        const save=await newBankDetails.save()
+        if(save)
+            return 'Document saved successfully.'
+        else
+            return 'Error while saving the Document.'
     }
 
-    updateBank(id:number, bankDetails:BankModel)
+    async updateBank(id:number, bankDetails:BankModel) : Promise<String>
     {
-       for(let index=0; index<=banks.length; index++)
-        {
-            if(banks[index].id==id)
-               {
-                banks[index]=bankDetails
-                return `Bank Details updated for ${id}.`
-               }
-        }
+      const updateBankDetails=await this.bank.updateOne({"id":id}, {$set:{"name":bankDetails.name, "branch":bankDetails.branch}}).exec()
 
-        return `No Bank detail found for ${id} id.`
+      if(updateBankDetails)
+        return 'Document updated successfully.'
+      else
+        return 'Document failed to update.'
     }
 
-    deleteBankDetails(id:number){
-       banks=banks.filter((bank:BankModel)=>bank.id!==id)
-       return `Bank Detail for bankId ${id} deleted successfully.`
+    async deleteBankDetails(id:number) : Promise<String>{
+      const deleteBankDetails=await this.bank.deleteOne({"id":id}).exec()
+
+      if(deleteBankDetails)
+        return 'Bank Details deleted successfully.'
+      else 
+        return 'Failed to delete bank details.'
     }   
 
-    findBankById(id:number){
-       let bankDetails=banks.filter((bank:BankModel)=>bank.id==id)
-
-       if(bankDetails.length)
-        return bankDetails[0]
-       
-       return `No Bank detail found for ${id} id.`
+    async findBankById(id:number) : Promise<BankDTO[]>{
+       return await this.bank.find({'id':id}).exec()
     }
 
-    findAllBank()
+    async findAllBank() : Promise<BankDTO[]>
     {
-        return banks;
+        return await this.bank.find().exec()
     }
 }

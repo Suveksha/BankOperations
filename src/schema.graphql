@@ -2,16 +2,16 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Bank {
+type BankDTO {
   id: Int!
-  name: String
-  branch: String
+  name: String!
+  branch: String!
 }
 
 type Query {
   initialized: String!
-  banks: [Bank!]!
-  getBankById(bankId: Int!): Bank
+  banks: [BankDTO!]!
+  getBankById(bankId: Int!): [BankDTO!]!
 }
 
 type Mutation {

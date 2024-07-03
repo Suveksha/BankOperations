@@ -14,16 +14,16 @@ export interface BankDetailsArgs {
     branch: string;
 }
 
-export interface Bank {
+export interface BankDTO {
     id: number;
-    name?: Nullable<string>;
-    branch?: Nullable<string>;
+    name: string;
+    branch: string;
 }
 
 export interface IQuery {
     initialized(): string | Promise<string>;
-    banks(): Bank[] | Promise<Bank[]>;
-    getBankById(bankId: number): Nullable<Bank> | Promise<Nullable<Bank>>;
+    banks(): BankDTO[] | Promise<BankDTO[]>;
+    getBankById(bankId: number): BankDTO[] | Promise<BankDTO[]>;
 }
 
 export interface IMutation {

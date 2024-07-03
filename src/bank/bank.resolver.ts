@@ -1,9 +1,10 @@
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { Bank } from './schema/bank.schema';
-import { Bank as BankModel } from 'src/graphql';
+import { BankClass } from './schema/bank.schema';
+import { BankModel } from './entity/bank.entity';
 import { BankService } from './bank.service';
 import { BankModule } from './bank.module';
 import { BankDetailsArgs } from './args/bank.args';
+import { BankDTO } from './dto/bank.dto';
 
 interface BankType{
     id:number,
@@ -11,67 +12,37 @@ interface BankType{
     branch:string
 }
 
-// const banks:BankModel[]=[
-//     {
-//         id:1,
-//         name:"HDFC Bank",
-//         branch:"Gurgaon"
-//     },
-//     {
-//         id:2,
-//         name:"IDFC Bank",
-//         branch:"Noida"
-//     },
-//     {
-//         id:1,
-//         name:"Punjab National Bank",
-//         branch:"Delhi"
-//     }
-// ]
-
-//Schema First Approach
-// @Resolver("Bank")
-// export class BankResolver {
-
-//     @Query('banks') //this indicates for which query this resolver will work
-//     getAllBanks() //return all bank details
-//     {
-//         return banks
-//     }
-// }
-
-
 //Code First Approach
-@Resolver(of=>Bank)
+@Resolver(of=>BankDTO)
 export class BankResolver{
 
     constructor(private bankService:BankService){}
 
 
-    @Query(returns=>[Bank], {name:'banks'}) //name: changes the name of the query. By default the name of the query is same as the function name below
-    getAllBanks() : BankModel[]
+    @Query(returns=>[BankDTO], {name:'banks'}) //name: changes the name of the query. By default the name of the query is same as the function name below
+    getAllBanks() : Promise<BankDTO[]>
     {
         return this.bankService.findAllBank()
     }
 
-    @Query(returns=>Bank,{nullable:true})
-    getBankById(@Args({name:'bankId',type:()=>Int}) id : number) : BankModel | string {
+    @Query(returns=>[BankDTO])
+    getBankById(@Args({name:'bankId',type:()=>Int}) id : number) : Promise<BankDTO[]> {
         return this.bankService.findBankById(id)
     }
     
     @Mutation(returns=>String)
-    deleteBankById(@Args({name:'bankId',type:()=>Int}) id:number) : String{
+    deleteBankById(@Args({name:'bankId',type:()=>Int}) id:number) : Promise<String>{
         return this.bankService.deleteBankDetails(id)
     }
 
     @Mutation(returns=>String)
-    addBankDetails(@Args("addBankArgs") addBankArgs : BankDetailsArgs) : String
+    addBankDetails(@Args("addBankArgs") addBankArgs : BankDetailsArgs) : Promise<String>
     {
         return this.bankService.addBankDetails(addBankArgs)
     }
 
     @Mutation(returns=>String)
-    updateBankDetails(@Args({name:'bankId',type:()=>Int}) id : number, @Args("addBankArgs") bankArgs:BankDetailsArgs) : String{
+    updateBankDetails(@Args({name:'bankId',type:()=>Int}) id : number, @Args("addBankArgs") bankArgs:BankDetailsArgs) : Promise<String>{
         return this.bankService.updateBank(id,bankArgs)
     }
 }
